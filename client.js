@@ -30,6 +30,9 @@ window.__ModuleLoader__.load({
         'output.both': '两个都要',
         'output.pdf': 'PDF 原版式',
         'output.web': '网页对照',
+        'layout': 'PDF 样式',
+        'layout.overlay': '原版式',
+        'layout.reflow': '重排（Word）',
         'mode': '网页对照方式',
         'mode.bilingual': '中英对照',
         'mode.translated': '仅译文',
@@ -47,6 +50,7 @@ window.__ModuleLoader__.load({
         'empty': '选择一份 PDF，确认页码后开始。翻译在后台进行，可以收起面板继续用 Harness。',
         'tasks': '最近任务',
         'open.pdf': '打开译文 PDF',
+        'open.docx': 'Word 文档',
         'open.html': '网页对照',
         'open.markdown': 'Markdown',
         'open.folder': '文件夹',
@@ -63,7 +67,7 @@ window.__ModuleLoader__.load({
         'browse.home': '个人目录',
         'browse.empty': '这个目录里没有子文件夹或 PDF。',
         'browse.close': '返回',
-        'footer': '输出目录里有：<文件名>.zh.pdf（保留原版式）、.zh.html（网页对照）、.zh.md、.zh.txt。',
+        'footer': '输出目录里有：.zh.pdf、.zh.html（网页对照）、.zh.md、.zh.txt；重排样式还会多一个 .zh.docx。',
         'note.started': '翻译已开始，正在后台运行。',
         'note.opened': '已打开：{path}',
         'note.picked': '已填入系统选择的结果。',
@@ -89,6 +93,9 @@ window.__ModuleLoader__.load({
         'output.both': 'Both',
         'output.pdf': 'Layout PDF',
         'output.web': 'Web page',
+        'layout': 'PDF style',
+        'layout.overlay': 'Original layout',
+        'layout.reflow': 'Reflow (Word)',
         'mode': 'Web page style',
         'mode.bilingual': 'Bilingual',
         'mode.translated': 'Translation only',
@@ -106,6 +113,7 @@ window.__ModuleLoader__.load({
         'empty': 'Pick a PDF, confirm the pages, and start. Translation runs in the background — you can keep using Harness.',
         'tasks': 'Recent tasks',
         'open.pdf': 'Open translated PDF',
+        'open.docx': 'Word document',
         'open.html': 'Bilingual web page',
         'open.markdown': 'Markdown',
         'open.folder': 'Folder',
@@ -283,6 +291,7 @@ window.__ModuleLoader__.load({
       const [pages, setPages] = useState('all');
       const [mode, setMode] = useState('bilingual');
       const [output, setOutput] = useState('both');
+      const [layout, setLayout] = useState('overlay');
       const [outputDir, setOutputDir] = useState('');
       const [language, setLanguage] = useState('中文');
       const [info, setInfo] = useState(null);
@@ -324,6 +333,7 @@ window.__ModuleLoader__.load({
         initialized.current = true;
         setMode(status.defaults?.mode === 'translated' ? 'translated' : 'bilingual');
         setOutput(['both', 'pdf', 'web'].includes(status.defaults?.output) ? status.defaults.output : 'both');
+        setLayout(status.defaults?.layout === 'reflow' ? 'reflow' : 'overlay');
         setOutputDir(status.defaults?.outputDir || '');
         setLanguage(status.defaults?.language || '中文');
       }, [status]);
@@ -413,11 +423,12 @@ window.__ModuleLoader__.load({
             pages: pages.trim() || 'all',
             mode,
             output,
+            layout,
             language: language.trim() || '中文',
             ...(outputDir.trim() ? { outputDir: outputDir.trim() } : {}),
           });
           setNote(tr('note.started'));
-          void api('defaults', { mode, output, language: language.trim() || '中文', ...(outputDir.trim() ? { outputDir: outputDir.trim() } : {}) }).catch(() => {});
+          void api('defaults', { mode, output, layout, language: language.trim() || '中文', ...(outputDir.trim() ? { outputDir: outputDir.trim() } : {}) }).catch(() => {});
           const next = await refresh();
           if (next) setStatus(next);
         } catch (failure) {
@@ -583,6 +594,13 @@ window.__ModuleLoader__.load({
                 h('button', { type: 'button', 'aria-pressed': mode === 'translated', onClick: () => setMode('translated') }, tr('mode.translated'))))),
 
           h('div', { className: 'ptm-section' },
+            h('span', { className: 'ptm-label' }, tr('layout')),
+            h('div', { className: 'ptm-seg' },
+              h('button', { type: 'button', 'aria-pressed': layout === 'overlay', onClick: () => setLayout('overlay') }, tr('layout.overlay')),
+              h('button', { type: 'button', 'aria-pressed': layout === 'reflow', onClick: () => setLayout('reflow') }, tr('layout.reflow')))),
+
+
+          h('div', { className: 'ptm-section' },
             h('label', { className: 'ptm-label', htmlFor: 'ptm-out' }, tr('output')),
             h('div', { className: 'ptm-row' },
               h('input', {
@@ -628,6 +646,9 @@ window.__ModuleLoader__.load({
                   ? h('div', { className: 'ptm-task-actions' },
                     task.outputs.pdf
                       ? h('button', { type: 'button', className: 'ptm-btn', onClick: () => void openResult(task.id, 'pdf') }, tr('open.pdf'))
+                      : null,
+                    task.outputs.docx
+                      ? h('button', { type: 'button', className: 'ptm-btn', onClick: () => void openResult(task.id, 'docx') }, tr('open.docx'))
                       : null,
                     h('button', { type: 'button', className: 'ptm-btn', onClick: () => void openResult(task.id, 'html') }, tr('open.html')),
                     h('button', { type: 'button', className: 'ptm-btn', onClick: () => void openResult(task.id, 'markdown') }, tr('open.markdown')),

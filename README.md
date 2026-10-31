@@ -2,7 +2,9 @@
 
 DeepSeek Harness 插件：把本地 PDF 逐页翻译成中文（或任意指定语言），直接使用当前登录的 **DeepSeek 模型**，不需要自备 API Key，也不会上传 PDF 原件。
 
-- **直接输出 PDF，且保留原版式**：页面尺寸、图片、图表、分栏、页眉页脚、页码都不动，译文按原文的段落位置覆盖上去（`.zh.pdf`）。
+- **两种 PDF 样式**：
+  - **原版式（overlay）**：页面尺寸、图片、图表、分栏、页码都不动，译文按原段落位置覆盖上去——适合文字型 PDF；
+  - **重排（reflow，Word 质量）**：先生成真正的 `.docx`（宋体、1.5 倍行距、首行缩进、真脚注），再用 Harness 自带的 LibreOffice 转成 `.zh.pdf`——适合扫描件，排版最干净，**图片/表格会省略**。
 - 同时生成中英对照的可打印 HTML、Markdown 和纯文本，方便校对与摘录。
 - 面板：聊天标题栏 →「PDF 翻译」，选 PDF、页码、输出方式，一键开始，实时进度、可取消。
 - 工具：`pdf_translate` / `pdf_translate_status`，可以在对话里直接让 AI 翻译。
@@ -13,11 +15,11 @@ DeepSeek Harness 插件：把本地 PDF 逐页翻译成中文（或任意指定�
 
 - DeepSeek Harness 桌面版（Web GUI），macOS。
 - 需要已登录 DeepSeek 账号（或已在 Harness 里配置好可用的模型）；插件使用「当前默认模型」。
-- 依赖 `pdfjs-dist`（安装时已随插件一起装好，位于本目录 `node_modules/`）。
+- 依赖 `pdfjs-dist`、`pdf-lib`、`@pdf-lib/fontkit`、`docx`（安装时已随插件一起装好，位于本目录 `node_modules/`）。
 
 ## 安装与启用
 
-先在插件目录装依赖（`pdfjs-dist`、`pdf-lib`、`@pdf-lib/fontkit`）：
+先在插件目录装依赖（`pdfjs-dist`、`pdf-lib`、`@pdf-lib/fontkit`、`docx`）：
 
 ```bash
 cd pdf-translator-mac
@@ -41,7 +43,7 @@ dsh plugin --profile desktop add /绝对路径/pdf-translator-mac
 
 1. 点标题栏「PDF 翻译」。
 2. 点「选择…」用系统对话框挑 PDF，或点「浏览」在内置文件列表里点选，也可以直接粘贴绝对路径。
-3. 页码填 `全部`、`1-5` 或 `1,3,5-8`；选输出格式（「PDF 原版式」/「网页对照」/「两个都要」，默认两个都要）和目标语言（默认中文）。「网页对照方式」只影响网页版，PDF 始终是译文覆盖。
+3. 页码填 `全部`、`1-5` 或 `1,3,5-8`；选输出格式（「PDF 原版式」/「网页对照」/「两个都要」）和目标语言（默认中文）；「PDF 样式」选「原版式」或「重排（Word）」。「网页对照方式」只影响网页版。
 4. 输出目录留空时，结果放在 PDF 同目录的 `<文件名>-翻译/`。
 5. 点「开始翻译」。进度条显示解析页数与翻译段数，随时可以「取消任务」；取消后已翻译的段落留在缓存里。
 6. 完成后点「打开译文 PDF」、「网页对照」、「Markdown」或「文件夹」。
@@ -60,7 +62,8 @@ dsh plugin --profile desktop add /绝对路径/pdf-translator-mac
 | `pages` | `all`、`1-5`、`1,3,5-8`，默认 all |
 | `language` | 目标语言，默认「中文」 |
 | `mode` | `bilingual`（默认）或 `translated`，只影响网页版 |
-| `output` | `both`（默认）、`pdf`（只出原版式 PDF）、`web`（只出网页对照） |
+| `output` | `both`（默认）、`pdf`（只出 PDF）、`web`（只出网页对照） |
+| `layout` | `overlay`（默认，原版式）、`reflow`（重排成 Word 再转 PDF，真脚注） |
 | `outputDir` | 输出目录，省略时用同目录 `<文件名>-翻译/` |
 | `background` | 默认 `true`（立即返回任务 ID）；`false` 等到结束再返回结果 |
 
@@ -70,7 +73,10 @@ dsh plugin --profile desktop add /绝对路径/pdf-translator-mac
 
 `<输出目录>/<文件名>-翻译/` 下：
 
-- `<文件名>.zh.pdf` — **保留原版式的中文 PDF**：在原 PDF 的每一页上，把原文段落区域盖成白底、在原来的位置写入译文；字号会自动压缩以塞进原段落的高度，一行的标题会优先保持一行。图片、图表、分栏、页眉页脚和页码都不动，扫描页的文字位置由 OCR 文字层决定。
+- `<文件名>.zh.pdf` — 中文 PDF。
+  - 原版式：在原 PDF 的每一页上，把原文段落区域盖成白底、在原来的位置写入译文；字号自动压缩，一行标题优先保持一行。**前提是 PDF 的文字层坐标与页面一致**（含隐藏 OCR 层的扫描件常常不一致，会出现英文与中文叠字）。
+  - 重排：A4、宋体 11pt、1.5 倍行距、首行缩进 2 字符、页脚页码，**脚注是真正的 Word 脚注**（页底分隔线 + 自动编号）。
+- `<文件名>.zh.docx` — 重排样式的 Word 源文件（可继续在 Word 里编辑）。
 - `<文件名>.zh.html` — 中英对照阅读页，带打印样式（A4）；「中英对照 / 仅译文」开关对 HTML/Markdown 有效，PDF 始终是译文覆盖原文。
 - `<文件名>.zh.md` — 对照 Markdown（原文段落 + 引用块译文）。
 - `<文件名>.zh.txt` — 纯译文。
@@ -82,7 +88,9 @@ dsh plugin --profile desktop add /绝对路径/pdf-translator-mac
 
 - 只处理**带文字层**的 PDF。扫描件（图片型 PDF）没有文字，会直接提示；请先用 OCR 工具处理。
 - 扫描件自带的 OCR 文字层常有断词、错字（如 `twelvetone`、`Webem`、句号错位），译文会继承这些错误；插件会尽量恢复被换行拆开的单词。
-- 原版式 PDF 依赖原 PDF 的文字坐标：旋转页（/Rotate 非 0）或裁切框与页面不一致的页会被跳过（网页版仍完整），报告里会列出跳过的页码。
+- 原版式 PDF 依赖原 PDF 的文字坐标：旋转页（/Rotate 非 0）或裁切框与页面不一致的页会被跳过（网页版仍完整）。
+- **重排样式会省略图片、表格和公式**（v1）；脚注按“页面底部 + 小字号”识别，Word 会自动重新编号，锚点可能落在该页最后一段；扫描件封面（JSTOR 等）会自动跳过。标题由一次很小的模型调用清洗并翻译。
+- 重排使用 Harness 自带的 LibreOffice 转 PDF；若环境缺少 Office 转 PDF 服务，会自动回退到原版式 PDF 并给出提示。
 - 中文字体：macOS 自带的 PingFang、宋体是 `.ttc` 字体集合，无法直接嵌入 PDF。插件优先使用 `/Library/Fonts/Arial Unicode.ttf`；找不到时可以把任意中文 TTF/OTF（例如 Noto Sans SC）放到 `~/.dsh/pdf-translator-mac/fonts/`，或用配置项 `fontPath` 指定。找不到字体时 PDF 会生成失败并保留网页版译文。
 - 页码选择上限默认 120 页（`maxPages` 可调），避免一次意外产生超大账单。
 - 公式会原样保留，但复杂数学排版不做重建；需要排版级重建请用专门的 LaTeX 翻译工具。
@@ -103,6 +111,7 @@ PDF 的**文本内容**会按段落发送给当前配置的模型端点（默认
     maxChunkChars: 1800     # 单次请求的最大字符数
     maxPages: 120           # 单次任务页数上限
     output: both            # 默认输出格式：both / pdf / web
+    layout: overlay         # 默认 PDF 样式：overlay / reflow
     provider: deepseek-official   # 省略时用当前默认模型
     model: deepseek-flash
     reasoningEffort: low    # 省略时自动选该模型最低的推理强度
@@ -121,6 +130,7 @@ lib/translate.js    分块、提示词、并发、重试、截断续翻、译文
 lib/llm.js          通过 Harness 的 llm 服务调用当前 DeepSeek 模型
 lib/render.js       Markdown / 纯文本 / 可打印 HTML 渲染
 lib/pdf-overlay.js  原版式 PDF：覆盖原文段落、按原坐标写中文、字号自适应
+lib/reflow.js       重排：结构识别 + DOCX（真脚注）+ Office 转 PDF
 lib/manager.js      任务状态、进度、持久化、原生文件对话框
 lib/routes.js       面板专用 POST API（复用宿主 connection 鉴权）
 locale/{zh,en}.json 插件市场/插件列表显示的标题与描述

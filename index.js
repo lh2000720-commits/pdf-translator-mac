@@ -57,6 +57,7 @@ export function apply(ctx, config = {}) {
     name: 'pdf_translate',
     description:
       '把本地 PDF 逐页翻译成中文（或指定语言），直接输出保留原版式的 PDF（页面、图片、图表、分栏和页码不变，译文覆盖在原文位置），同时给出中英对照的 HTML、Markdown 和纯文本。'
+      + 'PDF 有两种样式：overlay 保留原版式（适合文字型 PDF），reflow 重排成 Word 文档再转 PDF（排版干净、真脚注，适合扫描件，图片会省略）。'
       + '直接使用当前登录的 DeepSeek 模型，不需要 API Key，也不会上传 PDF 原件。'
       + '默认后台运行：立即返回 taskId，之后用 pdf_translate_status 查看进度（或在会话标题栏点「PDF 翻译」面板）。'
       + '翻译按页提取文字，扫描件（没有文字层）无法翻译。首次使用建议先用 pages 只翻 1–2 页确认效果。',
@@ -65,7 +66,8 @@ export function apply(ctx, config = {}) {
       pages: string('要翻译的页码：all、1-5、1,3,5-8。默认 all。'),
       language: string('目标语言，默认「中文」。可填 English、日本語 等。'),
       mode: string('bilingual = 中英对照（默认）；translated = 只要译文。填 bilingual 或 translated。只影响网页版，PDF 始终是译文覆盖。'),
-      output: string('输出格式：both（默认，PDF + 网页）、pdf（只保留原版式的 PDF）、web（只要网页对照）。'),
+      output: string('输出格式：both（默认，PDF + 网页）、pdf（只输出 PDF）、web（只要网页对照）。'),
+      layout: string('PDF 样式：overlay（默认，保留原版式、译文覆盖）、reflow（重排成 Word 文档再转 PDF，排版最干净，图片会省略）。'),
       outputDir: string('输出目录的绝对路径；省略时放在 PDF 同目录下的「<文件名>-翻译」文件夹。'),
       background: boolean('默认 true：立即返回任务 ID。false 表示等到翻译结束再返回结果。'),
     },
@@ -77,6 +79,7 @@ export function apply(ctx, config = {}) {
         language: args.language,
         mode: args.mode,
         output: args.output,
+        layout: args.layout,
         outputDir: args.outputDir,
       });
       if (args.background === false) {
