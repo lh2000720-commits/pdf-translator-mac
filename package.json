@@ -1,0 +1,62 @@
+{
+  "name": "@local/pdf-translator-mac",
+  "version": "0.1.0",
+  "private": true,
+  "description": "macOS 上的 PDF 文档翻译：用当前登录的 DeepSeek 模型把 PDF 逐页译成中文，输出中英对照的可打印 HTML 与 Markdown，无需自备 API Key。",
+  "type": "module",
+  "main": "index.js",
+  "author": "lh2000720-commits",
+  "license": "MIT",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "lib/**/*.js",
+    "locale/*.json",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "dependencies": {
+    "@pdf-lib/fontkit": "1.1.1",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "^6.3.289"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lh2000720-commits/pdf-translator-mac.git"
+  },
+  "homepage": "https://github.com/lh2000720-commits/pdf-translator-mac#readme",
+  "bugs": {
+    "url": "https://github.com/lh2000720-commits/pdf-translator-mac/issues"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "deepseek",
+    "pdf",
+    "translation",
+    "macos",
+    "pdf-lib",
+    "pdfjs"
+  ]
+}

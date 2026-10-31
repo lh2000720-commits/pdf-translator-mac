@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="PDF translation">
+  <defs>
+    <linearGradient id="ptm-paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fdfdfb"/>
+      <stop offset="1" stop-color="#e9eef6"/>
+    </linearGradient>
+    <linearGradient id="ptm-ink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3f6fe0"/>
+      <stop offset="1" stop-color="#6b3fd0"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="64" height="64" rx="14" fill="url(#ptm-ink)"/>
+  <path d="M17 12h20l10 10v30a2 2 0 0 1-2 2H17a2 2 0 0 1-2-2V14a2 2 0 0 1 2-2z" fill="url(#ptm-paper)" stroke="#243a6b" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M37 12v8a2 2 0 0 0 2 2h8" fill="#c9d6ee" stroke="#243a6b" stroke-width="1.6" stroke-linejoin="round"/>
+  <g fill="#4a5872">
+    <rect x="20" y="26" width="16" height="2.2" rx="1.1"/>
+    <rect x="20" y="31" width="13" height="2.2" rx="1.1"/>
+    <rect x="20" y="36" width="15" height="2.2" rx="1.1"/>
+  </g>
+  <path d="M45.5 41.5a6.5 6.5 0 1 0-2.1 4.8" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity="0.35"/>
+  <path d="M20 44.5h14" stroke="#3f6fe0" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="47" cy="45" r="8.5" fill="#1c8f5a" stroke="#ffffff" stroke-width="2"/>
+  <path d="M43.4 45.2l2.6 2.6 4.7-5.1" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

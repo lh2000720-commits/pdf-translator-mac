@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "PDF 翻译（macOS）",
+    "description": "用当前登录的 DeepSeek 模型逐页翻译 PDF：中文对照、可打印 HTML 与 Markdown，无需自备 API Key。"
+  }
+}
